@@ -33,8 +33,11 @@ void WifiClient_event_handler(void* arg, esp_event_base_t event_base,
 
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
         ESP_LOGD(TAG, "received station disconnected event, reconnecting...");
+        if(WifiClient::Singleton.isConnected()){
+            //Station was connected before, fire disconnected event
+            WifiClient::Singleton.fireEvent(WifiClient::Event::DISCONNECTED);
+        }
         WifiClient::Singleton.setConnected(false);
-        WifiClient::Singleton.fireEvent(WifiClient::Event::DISCONNECTED);
         result = esp_wifi_connect();
         if (result != ESP_OK) {
             ESP_LOGE(TAG, "esp_wifi_connect had an error: %s", esp_err_to_name(result));
@@ -50,8 +53,11 @@ void WifiClient_event_handler(void* arg, esp_event_base_t event_base,
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
         ESP_LOGD(TAG, "station connected, ip is: " IPSTR,
             IP2STR(&event->ip_info.ip));
+        if(!WifiClient::Singleton.isConnected()){
+            //Station was not connected before, fire connected event
+            WifiClient::Singleton.fireEvent(WifiClient::Event::CONNECTED);
+        }
         WifiClient::Singleton.setConnected(true);
-        WifiClient::Singleton.fireEvent(WifiClient::Event::CONNECTED);
     }
 }
 
