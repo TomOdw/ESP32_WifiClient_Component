@@ -9,7 +9,7 @@
 
 #include "WifiClient.h"
 
-#define LOG_LOCAL_LEVEL ESP_LOG_ERROR
+#define LOG_LOCAL_LEVEL ESP_LOG_WARN
 #include "esp_log.h"
 #define TAG "WifiClient"
 
@@ -23,7 +23,7 @@ void WifiClient_event_handler(void* arg, esp_event_base_t event_base,
     esp_err_t result;
 
     if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_START) {
-        ESP_LOGD(TAG, "received station start event, connecting...");
+        ESP_LOGI(TAG, "received station start event, connecting...");
 
         result = esp_wifi_connect();
 
@@ -32,7 +32,7 @@ void WifiClient_event_handler(void* arg, esp_event_base_t event_base,
         }
 
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_DISCONNECTED) {
-        ESP_LOGD(TAG, "received station disconnected event, reconnecting...");
+        ESP_LOGI(TAG, "received station disconnected event, reconnecting...");
         if(WifiClient::Singleton.isConnected()){
             //Station was connected before, fire disconnected event
             WifiClient::Singleton.fireEvent(WifiClient::Event::DISCONNECTED);
@@ -44,14 +44,14 @@ void WifiClient_event_handler(void* arg, esp_event_base_t event_base,
         }
 
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_WIFI_READY) {
-        ESP_LOGD(TAG, "received wifi ready event");
+        ESP_LOGI(TAG, "received wifi ready event");
 
     } else if (event_base == WIFI_EVENT && event_id == WIFI_EVENT_STA_CONNECTED) {
-        ESP_LOGD(TAG, "received wifi station connected event");
+        ESP_LOGI(TAG, "received wifi station connected event");
 
     } else if (event_base == IP_EVENT && event_id == IP_EVENT_STA_GOT_IP) {
         ip_event_got_ip_t* event = (ip_event_got_ip_t*)event_data;
-        ESP_LOGD(TAG, "station connected, ip is: " IPSTR,
+        ESP_LOGI(TAG, "station connected, ip is: " IPSTR,
             IP2STR(&event->ip_info.ip));
         if(!WifiClient::Singleton.isConnected()){
             //Station was not connected before, fire connected event
